@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convocatoria FOMMUR - Mujer Rural</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f3ff; /* Fondo blanco/lila muy claro */
+            color: #374151; /* Texto oscuro */
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .content-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.7); /* Fondo de tarjeta blanco semi-transparente */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(221, 214, 254, 0.6); /* Borde lila */
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(109, 40, 217, 0.05);
+        }
+        
+        /* Scroll Animation */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .scroll-animate.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .icon-bg {
+            @apply bg-purple-100 text-purple-600 rounded-full p-3 flex items-center justify-center border border-purple-200;
+        }
+        
+        .btn-primary {
+            @apply bg-purple-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-purple-500/20 transform hover:scale-105 hover:bg-purple-700 transition-all duration-300 ease-in-out;
+        }
+        
+        .btn-secondary {
+            @apply bg-white border-2 border-purple-600 text-purple-700 font-bold py-2 px-6 rounded-xl shadow-md shadow-purple-500/10 transform hover:scale-105 hover:bg-purple-50 transition-all duration-300 ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(168, 85, 247, 0); }
+        }
+
+        .animated-pulse {
+            animation: pulse 2.5s infinite;
+        }
+
+        /* Floating Nav Menu */
+        #page-nav {
+            position: fixed;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #page-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        #page-nav li a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: #f5f3ff;
+            color: #7c3aed;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #page-nav li a:hover {
+            background-color: #7c3aed;
+            color: white;
+            transform: scale(1.1);
+        }
+        #page-nav li a .tooltip {
+            position: absolute;
+            top: 50%;
+            right: 120%;
+            transform: translateY(-50%);
+            background-color: #374151;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+         #page-nav li a:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        @media print {
+            body, .card, .content-section {
+                background: #fff !important;
+                color: #000 !important;
+                box-shadow: none;
+            }
+            .card {
+                border: 1px solid #ccc;
+                backdrop-filter: none;
+            }
+            .btn-primary, .btn-secondary, #bg-canvas, .animate-bounce, #page-nav {
+                display: none;
+            }
+            .content-section {
+                min-height: auto;
+                padding: 2rem 0;
+            }
+            h1, h2, h3, h4, p, li, strong, span {
+                color: #000 !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- MAPA DE NAVEGACIÓN -->
+    <nav id="page-nav">
+        <ul>
+            <li><a href="#portada" aria-label="Ir a Portada"><span class="tooltip">Portada</span>🏠</a></li>
+            <li><a href="#requisitos" aria-label="Ir a Requisitos"><span class="tooltip">Requisitos</span>✅</a></li>
+            <li><a href="#beneficios" aria-label="Ir a Beneficios"><span class="tooltip">Beneficios</span>🎁</a></li>
+            <li><a href="#detalles" aria-label="Ir a Detalles"><span class="tooltip">Detalles</span>📜</a></li>
+            <li><a href="#postulacion" aria-label="Ir a Postulación"><span class="tooltip">Postúlate</span>✍️</a></li>
+            <li><a href="#aclaracion" aria-label="Ir a Aclaración"><span class="tooltip">Aclaración</span>🤝</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Section 1: Portada -->
+        <section id="portada" class="content-section min-h-screen">
+            <div class="text-center scroll-animate">
+                <h1 class="text-4xl md:text-6xl font-black text-gray-900 mb-4">Mujer Rural: <span class="text-purple-600">Sembrando Poder, Cosechando Futuro</span></h1>
+                <p class="text-gray-600 mb-8 text-xl">Una guía para cultivar tus proyectos con FOMMUR</p>
+                <img src="https://images.unsplash.com/photo-1599395359322-caste-of-women-in-field-with-baskets-on-their-heads?q=80&w=870&auto=format&fit=crop" alt="Mujeres rurales trabajando en el campo" class="rounded-2xl w-full max-w-md mx-auto shadow-2xl shadow-purple-200/80 border-4 border-white" onerror="this.onerror=null;this.src='https://placehold.co/600x400/a78bfa/ffffff?text=Mujer+Rural'">
+                <button id="explore-btn" class="btn-secondary mt-8 animate-bounce">↓ Explorar Convocatoria ↓</button>
+            </div>
+        </section>
+
+        <!-- Section 2: Requisitos -->
+        <section id="requisitos" class="content-section">
+            <div class="card scroll-animate">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center"><span class="text-purple-600 text-4xl mr-3">✅</span> ¿Puedes postularte?</h2>
+                <p class="text-lg text-gray-600 mb-6">Confirma que cumples estos requisitos para sembrar tu futuro:</p>
+                <ul class="space-y-3 text-base text-gray-700">
+                    <li class="flex items-center bg-purple-50/50 p-3 rounded-lg"><span class="icon-bg mr-3 text-lg">🇨🇴</span> Ser mujer colombiana, mayor de 18 años.</li>
+                    <li class="flex items-center bg-purple-50/50 p-3 rounded-lg"><span class="icon-bg mr-3 text-lg">📄</span> Pertenecer al SISBEN (grupos A, B o C) o ser mujer indígena.</li>
+                    <li class="flex items-center bg-purple-50/50 p-3 rounded-lg"><span class="icon-bg mr-3 text-lg">🚫</span> No haber recibido apoyos recientes de ciertas entidades.</li>
+                    <li class="flex items-center bg-purple-50/50 p-3 rounded-lg"><span class="icon-bg mr-3 text-lg">💡</span> Tener un negocio rural, un plan para empezar o haber sufrido pérdidas.</li>
+                    <li class="flex items-center bg-purple-50/50 p-3 rounded-lg"><span class="icon-bg mr-3 text-lg">📍</span> Tu iniciativa debe estar en la zona rural de los municipios listados.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Beneficios -->
+        <section id="beneficios" class="content-section">
+            <div class="card scroll-animate">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center"><span class="text-purple-600 text-4xl mr-3">🎁</span> La cosecha de tu esfuerzo</h2>
+                <p class="text-lg text-gray-600 mb-6">Estos son los frutos que puedes recibir:</p>
+                <div class="space-y-4 text-base">
+                    <div class="flex items-start p-4 rounded-lg bg-purple-50/50">
+                        <div class="icon-bg mr-4 w-12 h-12 flex-shrink-0"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12.375C12.6213 12.375 13.125 11.8713 13.125 11.25C13.125 10.6287 12.6213 10.125 12 10.125C11.3787 10.125 10.875 10.6287 10.875 11.25C10.875 11.8713 11.3787 12.375 12 12.375Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.25 6.75L6.46875 5.53125C8.03125 3.96875 10.4062 3.96875 11.9687 5.53125L12.0312 5.59375C13.5937 7.15625 13.5937 9.53125 12.0312 11.0937L11.0937 12.0312C9.53125 13.5937 7.15625 13.5937 5.59375 12.0312L5.53125 11.9687C3.96875 10.4062 3.96875 8.03125 5.53125 6.46875L6.75 5.25H5.25ZM6.75 18.75L5.53125 17.5312C3.96875 15.9687 3.96875 13.5937 5.53125 12.0312L5.59375 11.9687L11.9687 18.3437C10.4062 19.9062 8.03125 19.9062 6.46875 18.3437L6.75 18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.75 17.25L17.5312 18.4687C15.9687 20.0312 13.5937 20.0312 12.0312 18.4687L11.9687 18.4062C10.4063 16.8437 10.4063 14.4687 11.9687 12.9062L12.9062 11.9687C14.4687 10.4062 16.8437 10.4062 18.4062 11.9687L18.4687 12.0312C20.0312 13.5937 20.0312 15.9687 18.4687 17.5312L17.25 18.75H18.75Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div><h3 class="font-bold text-gray-800">Capital Semilla</h3><p class="text-gray-600">Un apoyo económico de hasta <strong>6,5 salarios mínimos</strong> (del 2025).</p></div>
+                    </div>
+                    <div class="flex items-start p-4 rounded-lg bg-purple-50/50">
+                        <div class="icon-bg mr-4 w-12 h-12 flex-shrink-0"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.25 12C8.25 11.175 8.925 10.5 9.75 10.5H14.25C15.075 10.5 15.75 11.175 15.75 12C15.75 12.825 15.075 13.5 14.25 13.5H9.75C8.925 13.5 8.25 12.825 8.25 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.75 16.5C9.75 15.675 10.425 15 11.25 15H12.75C13.575 15 14.25 15.675 14.25 16.5C14.25 17.325 13.575 18 12.75 18H11.25C10.425 18 9.75 17.325 9.75 16.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2.25C6.075 2.25 2.25 6.075 2.25 12C2.25 17.925 6.075 21.75 12 21.75C17.925 21.75 21.75 17.925 21.75 12C21.75 9.8625 21.0375 7.92188 19.875 6.375" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div><h3 class="font-bold text-gray-800">Conocimiento que Empodera</h3><p class="text-gray-600">Asistencia técnica para fortalecer tus habilidades y tu autonomía.</p></div>
+                    </div>
+                    <div class="flex items-start p-4 rounded-lg bg-purple-50/50">
+                        <div class="icon-bg mr-4 w-12 h-12 flex-shrink-0"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.75 2.25H14.25C18 2.25 18.75 3 18.75 6.75V9.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.25 14.25V17.25C5.25 21 6 21.75 9.75 21.75H14.25C18 21.75 18.75 21 18.75 17.25V14.25" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.75 9.75C18.75 12.4875 16.7375 14.25 14.25 14.25H9.75C7.2625 14.25 5.25 12.4875 5.25 9.75V6.75C5.25 4.0125 7.2625 2.25 9.75 2.25H14.25" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.25 7.5H9.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.75 10.5H9.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        <div><h3 class="font-bold text-gray-800">Un Plan a tu Medida</h3><p class="text-gray-600">Crearemos juntas un plan para que tu proyecto crezca fuerte.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Detalles de la Convocatoria -->
+        <section id="detalles" class="content-section">
+            <div class="card scroll-animate">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 flex items-center"><span class="text-purple-600 text-4xl mr-3">📜</span> Detalles de la Convocatoria</h2>
+                <div class="space-y-4 text-lg text-gray-700">
+                    <p>Esta es una convocatoria a <strong>nivel nacional</strong> del <strong class="text-purple-700">Fondo Mujer Libre y Productiva</strong> del Gobierno de Colombia, para seleccionar al menos a <strong>895 mujeres rurales</strong>.</p>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-2">📍 Municipios Priorizados en el Valle del Cauca:</h3>
+                        <p class="text-base bg-purple-50/50 p-3 rounded-lg">Buenaventura, Bugalagrande, Candelaria, Cartago, El Cerrito, Guadalajara de Buga, Jamundí, Palmira, Tuluá, Yumbo, Zarzal.</p>
+                    </div>
+                     <div>
+                        <h3 class="font-bold text-gray-800 mb-3 mt-4">¿Cuál es tu caso? Entiende los 3 tipos de beneficio:</h3>
+                        <div class="space-y-3">
+                            <!-- Apoyo -->
+                            <div class="bg-purple-50/50 p-4 rounded-lg flex items-start gap-4">
+                                <div class="text-3xl flex-shrink-0 mt-1">🌱</div>
+                                <div>
+                                    <h4 class="font-bold text-purple-800">Apoyo</h4>
+                                    <p class="text-base">Si ya tienes un negocio rural funcionando hace más de un año y quieres <strong>mejorarlo y hacerlo crecer</strong>.</p>
+                                </div>
+                            </div>
+                            <!-- Compensación (Resarcir) -->
+                            <div class="bg-purple-50/50 p-4 rounded-lg flex items-start gap-4">
+                                <div class="text-3xl flex-shrink-0 mt-1">❤️‍🩹</div>
+                                <div>
+                                    <h4 class="font-bold text-purple-800">Compensación (Resarcir)</h4>
+                                    <p class="text-base">Si sufriste una pérdida en tus activos productivos por una emergencia o caso fortuito y necesitas ayuda para <strong>recuperarte</strong>.</p>
+                                </div>
+                            </div>
+                            <!-- Incentivo -->
+                            <div class="bg-purple-50/50 p-4 rounded-lg flex items-start gap-4">
+                                <div class="text-3xl flex-shrink-0 mt-1">💡</div>
+                                <div>
+                                    <h4 class="font-bold text-purple-800">Incentivo</h4>
+                                    <p class="text-base">Si tienes una idea o un plan para <strong>iniciar o reanudar</strong> un proyecto productivo en el campo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Cómo Postularse -->
+        <section id="postulacion" class="content-section">
+             <div class="card scroll-animate text-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center"><span class="text-purple-600 text-4xl mr-3">✍️</span> ¡Postúlate Aquí!</h2>
+                <p class="text-lg text-gray-600 mb-8 max-w-md mx-auto">El paso más importante es <strong>llenar el formulario oficial</strong> en línea. Haz clic en el botón para empezar tu viaje.</p>
+                <div class="my-4">
+                    <a href="https://survey.alchemer.eu/s3/90845109/FOMMUR-L3-2025" target="_blank" class="btn-primary inline-block text-lg animated-pulse">
+                        Completar Formulario de Postulación
+                    </a>
+                </div>
+                <p class="text-base text-gray-500/70 mt-6 max-w-sm mx-auto">Recuerda tener tus documentos a la mano, ya que los necesitarás durante el proceso.</p>
+            </div>
+        </section>
+        
+        <!-- Section 6: Anuncio Especial -->
+        <section class="content-section">
+            <div class="card scroll-animate text-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-3">¡Anuncio Importante!</h2>
+                <p class="text-lg text-gray-600 mb-6">¿Necesitas ayuda con los formularios?</p>
+                <div class="bg-purple-600 rounded-lg p-6 text-white shadow-2xl w-full max-w-md mx-auto border border-purple-500">
+                    <div class="inline-block bg-white text-purple-600 font-bold text-xs px-3 py-1 rounded-full mb-3">REUNIÓN VIRTUAL</div>
+                    <p class="font-bold text-xl">¡No estás sola! Te acompañamos.</p>
+                    <p class="mb-4 text-purple-200">Participa en nuestra jornada de apoyo para resolver todas tus dudas.</p>
+                    <p class="mt-3 font-bold text-white text-lg">🗓️ Fecha: Martes, 8 de Julio de 2025</p>
+                    <p class="font-bold text-white text-lg">⏰ Hora: 6:00 PM - 7:00 PM</p>
+                    <a href="https://meet.google.com/iuj-trae-atj" target="_blank" class="mt-4 btn-primary inline-block bg-white text-purple-700 animated-pulse">Entrar a la Reunión Virtual</a>
+                    <div class="text-xs text-purple-200 mt-4">
+                        <p>Otras formas de unirse:</p>
+                        <p>Por teléfono: ‪(CO) +57 601 8957400‬ (PIN: ‪463 411 528‬#)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Fechas y Cierre -->
+        <section id="aclaracion" class="content-section">
+            <div class="text-center scroll-animate">
+                 <div class="card mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center"><span class="text-purple-600 text-4xl mr-3">🗓️</span> Fechas y Enlaces Clave</h2>
+                     <ul class="space-y-3 text-left text-gray-700 mb-6 text-base">
+                        <li class="flex items-center"><strong class="text-purple-700 w-28">Consultas:</strong><span class="text-gray-700">Hasta el 1 de julio de 2025.</span></li>
+                        <li class="flex items-center"><strong class="text-purple-700 w-28">Cierre:</strong><span class="text-gray-700"><strong>22 de julio de 2025 a la 1:00 p.m.</strong></span></li>
+                         <li class="flex items-center"><strong class="text-purple-700 w-28">Resultados:</strong><span class="text-gray-700">Se publicarán hasta agotar cupos.</span></li>
+                    </ul>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="https://fondomujer.gov.co/portfolio/convocatoria-no-986-l3-fommur-fm-2025v/#resultados" target="_blank" class="btn-secondary">Consultar Resultados</a>
+                        <button id="download-html-btn" class="btn-secondary">Descargar Página (.html)</button>
+                        <button id="download-page-btn" class="btn-secondary">Descargar Guía (PDF)</button>
+                    </div>
+                </div>
+                
+                <div class="card mt-8 overflow-hidden">
+                    <div class="h-2 bg-gradient-to-r from-purple-500 to-pink-500 -mx-8 -mt-8 mb-6"></div>
+                    <img src="https://i.postimg.cc/FKCfR8J8/Recurso-2.png" alt="Logo del Colectivo Siembra" class="h-20 w-auto mx-auto mb-4" onerror="this.onerror=null;this.style.display='none'">
+                    <h3 class="font-bold text-xl text-gray-900 mb-4 text-center">Una Nota Importante del Colectivo Siembra</h3>
+                    <div class="text-left text-lg text-gray-800 space-y-4">
+                       <p>Somos un <strong>colectivo estudiantil interdisciplinario</strong> de la Universidad Nacional de Colombia, Sede Palmira. Esta es una <strong>guía explicativa</strong> sobre la convocatoria del Fondo de Mujeres del Gobierno Nacional.</p>
+                       
+                       <div class="p-4 bg-yellow-100/50 border-l-4 border-yellow-400 text-yellow-900 rounded-r-lg">
+                           <p class="font-bold">Nuestra Visión:</p>
+                           <p class="italic">"Ser semillas que se siembran en los territorios, puentes de cocreación y dinamizadores de procesos."</p>
+                       </div>
+
+                       <p class="p-4 bg-red-100/50 border-l-4 border-red-500 text-red-900 rounded-r-lg">
+                           <strong class="font-bold">Aclaración Clave:</strong> NO somos funcionarios del Gobierno, ni de la Alcaldía, ni dinamizadores oficiales. Nuestro único objetivo es ser un puente de apoyo para <strong>nuestras comunidades</strong>, facilitando el uso de la tecnología y el acceso a la información.
+                       </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="relative z-10 bg-white py-10 text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <img src="https://i.postimg.cc/FKCfR8J8/Recurso-2.png" alt="Logo del Colectivo Siembra" class="h-24 w-auto mx-auto mb-4" onerror="this.onerror=null;this.style.display='none'">
+            <h4 class="text-2xl font-bold text-gray-800">Colectivo Siembra</h4>
+            <p class="text-gray-600">Universidad Nacional de Colombia, Sede Palmira</p>
+            <div class="flex justify-center gap-6 mt-4">
+                <a href="#" class="text-gray-500 hover:text-purple-600 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
+                </a>
+                <a href="https://www.instagram.com/colectivosiembra_unalpal/?utm_source=qr&igsh=c3k1YnJwMHptdmM4#" target="_blank" class="text-gray-500 hover:text-purple-600 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.08 2.465c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 8.118c-2.147 0-3.882 1.735-3.882 3.882s1.735 3.882 3.882 3.882 3.882-1.735 3.882-3.882S14.147 8.118 12 8.118zM12 14.002a2.002 2.002 0 01-2.002-2.002A2.002 2.002 0 0112 10a2.002 2.002 0 012.002 2.002A2.002 2.002 0 0112 14.002zM16.965 6.575a1.26 1.26 0 100 2.52 1.26 1.26 0 000-2.52z" clip-rule="evenodd" /></svg>
+                </a>
+                <a href="#" class="text-gray-500 hover:text-purple-600 transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js Background Animation
+        let scene, camera, renderer, stars;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.querySelector('#bg-canvas'),
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const starGeo = new THREE.BufferGeometry();
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starVertices.push(x, y, z);
+            }
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xc4b5fd,
+                size: 2.0,
+                transparent: true,
+                map: createCircleTexture(),
+                blending: THREE.AdditiveBlending
+            });
+            
+            const purpleMaterial = new THREE.PointsMaterial({
+                color: 0x7c3aed,
+                size: 3.5,
+                transparent: true,
+                map: createCircleTexture(),
+                blending: THREE.AdditiveBlending
+            });
+            
+            stars = new THREE.Points(starGeo, starMaterial);
+            const purpleStars = new THREE.Points(starGeo.clone(), purpleMaterial);
+            purpleStars.scale.set(0.5, 0.5, 0.5);
+
+            scene.add(stars, purpleStars);
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onMouseMove, false);
+
+            animate();
+        }
+
+        function createCircleTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const context = canvas.getContext('2d');
+            const gradient = context.createRadialGradient(
+                canvas.width / 2,
+                canvas.height / 2,
+                0,
+                canvas.width / 2,
+                canvas.height / 2,
+                canvas.width / 2
+            );
+            gradient.addColorStop(0, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.2, 'rgba(255,255,255,1)');
+            gradient.addColorStop(0.4, 'rgba(255,255,255,0.4)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+            
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            stars.rotation.y += 0.0001;
+            stars.rotation.x += 0.0001;
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        let mouseX = 0, mouseY = 0;
+        function onMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) / 100;
+            mouseY = (event.clientY - window.innerHeight / 2) / 100;
+            camera.position.x += (mouseX - camera.position.x) * 0.01;
+            camera.position.y += (-mouseY - camera.position.y) * 0.01;
+            camera.lookAt(scene.position);
+        }
+
+        init();
+
+        // Scroll Animation Logic
+        const scrollElements = document.querySelectorAll('.scroll-animate');
+
+        const elementInView = (el, dividend = 1) => {
+            const elementTop = el.getBoundingClientRect().top;
+            return (
+                elementTop <=
+                (window.innerHeight || document.documentElement.clientHeight) / dividend
+            );
+        };
+
+        const displayScrollElement = (element) => {
+            element.classList.add('is-visible');
+        };
+
+        const handleScrollAnimation = () => {
+            scrollElements.forEach((el) => {
+                if (elementInView(el, 1.25)) {
+                    displayScrollElement(el);
+                }
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            handleScrollAnimation();
+        });
+        
+        handleScrollAnimation();
+        
+        // Button Logic
+        const exploreBtn = document.getElementById('explore-btn');
+        const firstCardSection = document.getElementById('requisitos');
+        const downloadPageBtn = document.getElementById('download-page-btn');
+        const downloadHtmlBtn = document.getElementById('download-html-btn');
+
+        exploreBtn.addEventListener('click', () => {
+            firstCardSection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        downloadPageBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+        downloadHtmlBtn.addEventListener('click', () => {
+            const pageHTML = document.documentElement.outerHTML;
+            const blob = new Blob([pageHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Guia_Interactiva_FOMMUR.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+    </script>
+</body>
+</html>
+
